@@ -1,0 +1,72 @@
+To run the log file and create a toolbar on the taskbar, you'll need to:
+
+
+1. Create a batch file (.bat) that parses the log file and creates shortcuts.
+2. Run the batch file from the Command Prompt.
+
+
+Here's a sample batch file (`create_toolbar.bat`) that assumes your log file (`log.txt`) has the following format:
+
+
+```
+Name,Location,exe
+App1,C:\Apps\App1,app1.exe
+App2,C:\Apps\App2,app2.exe
+SubApp1,C:\Apps\App1\SubApp1,subapp1.exe
+SubApp2,C:\Apps\App2\SubApp2,subapp2.exe
+``"
+
+
+**create_toolbar.bat**
+```batch
+@echo off
+set LOG_FILE=log.txt
+set TOOLBAR_FOLDER=MyApps
+set TASKBAR_TOOLBAR_PATH=%USERPROFILE%\%TOOLBAR_FOLDER%
+
+:: Create toolbar folder
+mkdir "%TASKBAR_TOOLBAR_PATH%"
+
+:: Parse log file and create shortcuts
+for /f "tokens=1,2,3 delims=," %%a in (%LOG_FILE%) do (
+    set NAME=%%a
+    set LOCATION=%%b
+    set EXE=%%c
+    
+    :: Create shortcut
+    set SHORTCUT_PATH=%TASKBAR_TOOLBAR_PATH%\%NAME%.lnk
+    echo Creating shortcut for %NAME%...
+    powershell -Command "$wshShell = New-Object -ComObject WScript.Shell; $shortcut = $wshShell.CreateShortcut('%SHORTCUT_PATH%'); $shortcut.TargetPath = '%LOCATION%\%EXE%'; $shortcut.Save()"
+)
+
+:: Pin toolbar to taskbar
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskbar" /v "MyApps" /t REG_SZ /d "%TASKBAR_TOOLBAR_PATH%" /f
+``"
+
+
+**Instructions:**
+
+1. Save the batch file (`create_toolbar.bat`) in the same directory as your log file (`log.txt`).
+2. Open the Command Prompt.
+3. Navigate to the directory containing the batch file and log file using `cd`.
+4. Run the batch file by typing `create_toolbar.bat` and pressing Enter.
+
+
+The batch file will:
+
+
+1. Create a folder (`MyApps`) to serve as the toolbar.
+2. Parse the log file and create shortcuts for each application.
+3. Pin the toolbar to the taskbar.
+
+
+After running the batch file, you should see a new toolbar on your taskbar with all the programs/apps mentioned in the log file.
+
+
+**Troubleshooting:**
+
+- Ensure the log file is in the correct format.
+- Verify the batch file has execute permissions.
+- Check for errors in the Command Prompt output.
+- If issues persist, try running the batch file as an administrator.
+```
